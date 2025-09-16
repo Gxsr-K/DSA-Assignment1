@@ -42,16 +42,6 @@ public type Assets record {|
     Schedule[] schedules;
     WorkOrder[] workOrders;
 |};
-public type newAssets record {|
-    string name;
-    string faculty;
-    string department;
-    AssetStatus status;
-    time:Date acquiredDate;
-    Component[] components;
-    Schedule[] schedules;
-    WorkOrder[] workOrders;
-|};
 
 // Your table is correctly defined.
 table<Assets> key(assetTag) assetsTable = table [
@@ -101,4 +91,45 @@ service /assetManagement on new http:Listener(9090) {
         }
         return asset;
     }
-}
+
+        // Added: POST /assets - Create a new asset.
+    resource function post assets(@http:Payload Assets newAsset) returns http:Created|http:Conflict {
+        if assetsTable.hasKey(newAsset.assetTag) {
+            // Return 409 Conflict if assetTag already exists
+            return http:CONFLICT;
+        }
+        assetsTable.add(newAsset);
+        // Return 201 Created on success
+        return http:CREATED;
+    }
+
+    // Added: DELETE /assets/[assetTag] - Delete an asset.
+    resource function delete assets/[string assetTag]() returns http:NoContent|http:NotFound {
+        Assets? asset = assetsTable.remove(assetTag);
+        if asset is () {
+            return http:NOT_FOUND;
+        }
+        // Return 204 No Content on successful deletion
+        return http:NO_CONTENT;
+    }
+        // Added: GET /assets/by-faculty/[facultyName] - Get assets by faculty.
+    resource function get assets/by\-faculty/[string facultyName]() returns Assets[] {
+        Assets[] assetsByFaculty = from var asset in assetsTable
+            where asset.faculty.toLowerAscii() == facultyName.toLowerAscii()
+            select asset;
+        return assetsByFaculty;
+    }
+        // Added: POST /assets/[assetTag]/components - Add a component to an asset.
+    resource function post assets/[string assetTag]/components(@http:Payload Component newComponent) returns Component[]|http:NotFound {
+        Assets? asset = assetsTable[assetTag];
+        if asset is () {
+            return http:NOT_FOUND;
+        }
+        asset.components.push(newComponent);
+        return asset.components;
+    }
+
+
+
+
+    }
