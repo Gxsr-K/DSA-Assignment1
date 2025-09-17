@@ -167,27 +167,20 @@ resource function put assets/[string assetTag](@http:Payload Assets updatedAsset
  
     // Check for overdue maintenance schedules
     resource function get assets/overdue() returns Assets[]|string {
-    time:Utc currentUtc = time:utcNow();
-    int todayEpoch = currentUtc.time;
+        time:Civil currentCivilDate = time:utcToCivil(time:utcNow());
+        Assets[] overdueAssets = from var asset in assetsTable
+                                 where asset.schedules.some(s =>
+                                     (s.nextDueDate.year < currentCivilDate.year) ||
+                                     (s.nextDueDate.year == currentCivilDate.year && s.nextDueDate.month < currentCivilDate.month) ||
+                                     (s.nextDueDate.year == currentCivilDate.year && s.nextDueDate.month == currentCivilDate.month && s.nextDueDate.day < currentCivilDate.day)
+                                 )
+                                 select asset;
 
-    Assets[] overdueAssets = [];
-
-    foreach var asset in assetsTable {
-        foreach var schedule in asset.schedules {
-            time:Utc dueUtc = time:constructUtcFromDate(schedule.nextDueDate);
-            if dueUtc.time < todayEpoch {
-                overdueAssets.push(asset);
-                break;
-            }
+        if overdueAssets.length() == 0 {
+            return "No assets with overdue maintenance schedules found.";
         }
+        return overdueAssets;
     }
-
-    if overdueAssets.length() == 0 {
-        return "No overdue maintenance schedules found.";
-    }
-
-    return overdueAssets;
-}
 
 
     // Add a schedule to an asset
