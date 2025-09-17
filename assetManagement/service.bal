@@ -73,63 +73,94 @@ table<Assets> key(assetTag) assetsTable = table [
 // Service implementation
 service /assetManagement on new http:Listener(9090) {
 
-    // get all assets
-    // The resource function name should be assets, and the path should be '/assets' which is
-    // inferred from the service name '/assetManagement' and the resource name 'assets'.
-    resource function get assets() returns Assets[] {
+    // CHANGED: The function now checks if the table is empty.
+    resource function get assets() returns Assets[]|string {
+        if assetsTable.length() == 0 {
+            return "No assets found.";
+        }
         return assetsTable.toArray();
     }
 
-    // get asset by assetTag
-    // The path parameter 'assetTag' is defined in the resource name as '[string assetTag]'.
-    // The return type is a union of 'Assets' or the built-in 'http:NotFound' type.
-    resource function get assets/[string assetTag]() returns Assets|http:NotFound {
+    // CHANGED: Returns a string message if the asset is not found.
+    resource function get assets/[string assetTag]() returns Assets|string {
         Assets? asset = assetsTable[assetTag];
         if asset is () {
-            // Return the http:NotFound constant to indicate a 404 error.
-            return http:NOT_FOUND;
+            return "Asset with tag '" + assetTag + "' not found.";
         }
         return asset;
     }
 
-        // Added: POST /assets - Create a new asset.
-    resource function post assets(@http:Payload Assets newAsset) returns http:Created|http:Conflict {
+    // CHANGED: Returns a string message upon successful creation.
+    resource function post assets(@http:Payload Assets newAsset) returns string|http:Conflict {
         if assetsTable.hasKey(newAsset.assetTag) {
-            // Return 409 Conflict if assetTag already exists
             return http:CONFLICT;
         }
         assetsTable.add(newAsset);
-        // Return 201 Created on success
-        return http:CREATED;
+        return "Asset with tag '" + newAsset.assetTag + "' has been created successfully.";
     }
 
-    // Added: DELETE /assets/[assetTag] - Delete an asset.
-    resource function delete assets/[string assetTag]() returns http:NoContent|http:NotFound {
+    // CHANGED: Returns a string message upon successful deletion.
+    resource function delete assets/[string assetTag]() returns string|http:NotFound {
         Assets? asset = assetsTable.remove(assetTag);
         if asset is () {
             return http:NOT_FOUND;
         }
-        // Return 204 No Content on successful deletion
-        return http:NO_CONTENT;
+        return "Asset with tag '" + assetTag + "' has been deleted successfully.";
     }
-        // Added: GET /assets/by-faculty/[facultyName] - Get assets by faculty.
-    resource function get assets/by\-faculty/[string facultyName]() returns Assets[] {
-        Assets[] assetsByFaculty = from var asset in assetsTable
-            where asset.faculty.toLowerAscii() == facultyName.toLowerAscii()
-            select asset;
-        return assetsByFaculty;
-    }
-        // Added: POST /assets/[assetTag]/components - Add a component to an asset.
-    resource function post assets/[string assetTag]/components(@http:Payload Component newComponent) returns Component[]|http:NotFound {
+
+ resource function get assets/by\-faculty/[string facultyName]() returns Assets[]|string {
+ Assets[] assetsByFaculty = from var asset in assetsTable
+ where asset.faculty.toLowerAscii() == facultyName.toLowerAscii()
+ select asset;
+
+ if assetsByFaculty.length() == 0 {
+ return "No assets found for faculty '" + facultyName + "'.";
+ }
+return assetsByFaculty;
+ }
+
+    // UPDATED: Checks for duplicate component and returns a success message.
+ resource function post assets/[string assetTag]/components(@http:Payload Component newComponent) returns string|http:NotFound|http:Conflict {
+ Assets? asset = assetsTable[assetTag];
+ if asset is () {
+ // Return a specific message if asset is not found.
+ return "Asset with tag '" + assetTag + "' not found.";
+ }
+ // Check for an existing component with the same ID.
+     if asset.components.some(comp => comp.id == newComponent.id) {
+    return http:CONFLICT;
+ }
+ asset.components.push(newComponent);
+ // Return a success message.
+     return "Component with ID '" + newComponent.id + "' has been added to asset '" + assetTag + "'.";
+ }
+
+    // UPDATED: Returns a string message upon successful deletion.
+    resource function delete assets/[string assetTag]/components/[string componentId]() returns string|http:NotFound {
         Assets? asset = assetsTable[assetTag];
         if asset is () {
             return http:NOT_FOUND;
         }
-        asset.components.push(newComponent);
-        return asset.components;
+        int? index = ();
+        foreach int i in 0 ..< asset.components.length() {
+            if asset.components[i].id == componentId {
+                index = i;
+                break;
+            }
+        }
+        if index is () {
+            return http:NOT_FOUND;
+        }
+        _ = asset.components.remove(index);
+        return "Component with ID '" + componentId + "' has been deleted.";
     }
-
-
-
-
+ // NEW: Added PUT for updating an existing asset.
+resource function put assets/[string assetTag](@http:Payload Assets updatedAsset) returns string|http:NotFound {
+    if !assetsTable.hasKey(assetTag) {
+        return http:NOT_FOUND;
     }
+    assetsTable.put(updatedAsset);
+    return "Asset with tag '" + assetTag + "' has been updated successfully.";
+}
+
+}
