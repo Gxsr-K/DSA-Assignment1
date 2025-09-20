@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+package carrental;
+
+// --- Messages ---
+
+message Car {
+  string plate = 1;
+  string make = 2;
+  string model = 3;
+  int32 year = 4;
+  double daily_price = 5;
+  int32 mileage = 6;
+  string status = 7; // "AVAILABLE" | "UNAVAILABLE"
+}
+
+message User {
+  string id = 1;
+  string name = 2;
+  string role = 3; // "CUSTOMER" | "ADMIN"
+}
+
+message CreateUsersResponse {
+  int32 created = 1;
+  string message = 2;
+}
+
+message AddCarResponse {
+  string plate = 1;
+  string message = 2;
+}
+
+message UpdateCarRequest {
+  string plate = 1;
+  Car car = 2; // full replacement (server may update fields present)
+}
+
+message RemoveCarRequest {
+  string plate = 1;
+}
+
+message CarsList {
+  repeated Car cars = 1;
+}
+
+message CarFilter {
+  string text = 1; // optional filter (make/model/year/plate substring)
+}
+
+message SearchResponse {
+  bool found = 1;
+  bool available = 2;
+  Car car = 3;
+  string message = 4;
+}
+
+message CartItem {
+  string plate = 1;
+  string start_date = 2; // YYYY-MM-DD
+  string end_date = 3;   // YYYY-MM-DD
+}
+
+message AddToCartRequest {
+  string user_id = 1;
+  CartItem item = 2;
+}
+
+message AddToCartResponse {
+  bool ok = 1;
+  string message = 2;
+}
+
+message Reservation {
+  string reservation_id = 1;
+  string user_id = 2;
+  CartItem item = 3;
+  double price = 4;
+}
+
+message PlaceReservationResponse {
+  bool ok = 1;
+  string message = 2;
+  repeated Reservation reservations = 3;
+}
+
+message Empty {}
+
+
+// --- Service ---
+
+service CarRental {
+  // Admin operations
+  rpc AddCar (Car) returns (AddCarResponse);
+  rpc CreateUsers (stream User) returns (CreateUsersResponse);
+  rpc UpdateCar (UpdateCarRequest) returns (AddCarResponse);
+  rpc RemoveCar (RemoveCarRequest) returns (CarsList);
+
+  // Customer operations
+  rpc ListAvailableCars (CarFilter) returns (stream Car);
+  rpc SearchCar (CarFilter) returns (SearchResponse);
+  rpc AddToCart (AddToCartRequest) returns (AddToCartResponse);
+  rpc PlaceReservation (User) returns (PlaceReservationResponse);
+
+  // Admin streaming: list all reservations
+  rpc ListReservations (Empty) returns (stream Reservation);
+}
