@@ -23,17 +23,60 @@ The project demonstrates REST principles, gRPC remote invocation, streaming, and
 ## Project Structure
 
 ```
+# DSA Assignment 1 - Project Structure
 
-DSA-Assignment1/
-├── assessment\_management/              # Question 1: Asset Management System
-│   ├── service.bal                     # RESTful API service implementation
-│   └── client/
-│       └── client.bal                  # REST API client application
-├── carrental\_service/                  # Question 2: Car Rental System
-│   └── carrental\_service\_service.bal   # gRPC server implementation
-├── carrental\_client/
-│   └── carrentalservice\_client.bal     # gRPC client application
-└── README.md                           # Documentation file
+```
+DSA-Assignment-1/
+├── assetManagement/
+│   ├── .devcontainer.json
+│   ├── .gitignore
+│   ├── Ballerina.toml
+│   ├── Dependencies.toml
+│   └── service.bal
+│
+├── assetManagementClient/
+│   ├── .devcontainer.json
+│   ├── .gitignore
+│   ├── Ballerina.toml
+│   ├── Dependencies.toml
+│   └── client.bal
+│
+└── car-rental-system/
+    ├── car-rental/
+    │   └── Ballerina.toml
+    │
+    ├── car-rental-client/
+    │   ├── target/
+    │   ├── Ballerina.toml
+    │   ├── Dependencies.toml
+    │   ├── car_rental_pb.bal
+    │   └── car_rental_service_client.bal
+    │
+    ├── car-rental-service/
+    │   ├── target/
+    │   ├── Ballerina.toml
+    │   ├── Dependencies.toml
+    │   ├── car_rental_pb.bal
+    │   └── car_rental_service_service.bal
+    │
+    └── protos/
+        ├── proto/
+        │   ├── LICENSE
+        │   └── README.md
+        ├── TESTING.md
+        ├── build.bat
+        ├── README.md
+        ├── start-client.bat
+        └── start-server.bat
+```
+
+## File Types Summary
+- **Configuration**: Ballerina.toml, Dependencies.toml, .devcontainer.json, .gitignore
+- **Source Code**: service.bal, client.bal, car_rental_pb.bal, car_rental_service_client.bal, car_rental_service_service.bal
+- **Scripts**: build.bat, start-client.bat, start-server.bat
+- **Documentation**: README.md, TESTING.md, LICENSE
+- **Build Artifacts**: target/ folders
+
 
 ````
 
