@@ -70,7 +70,7 @@ service "CarRental" on ep {
         }
         
         // Get existing car and create updated version
-        Car existingCar = cars[value.plate];
+        Car existingCar = cars[value.plate] ?: {};
         Car updatedCar = existingCar.clone();
         
         // Update only non-empty/non-zero fields
@@ -124,7 +124,7 @@ service "CarRental" on ep {
         
         // Try exact plate match first
         if cars.hasKey(value.text) {
-            Car foundCar = cars[value.text];
+            Car foundCar = cars[value.text] ?: {};
             boolean isAvailable = foundCar.status == "AVAILABLE";
             return {
                 found: true,
@@ -171,7 +171,7 @@ service "CarRental" on ep {
         }
         
         // Check car availability
-        Car car = cars[value.item.plate];
+        Car car = cars[value.item.plate] ?: {};
         if car.status != "AVAILABLE" {
             return {ok: false, message: "Car is not available for rental"};
         }
@@ -188,7 +188,7 @@ service "CarRental" on ep {
         // Add to user's cart
         CartItem[] currentCart = [];
         if userCarts.hasKey(value.user_id) {
-            currentCart = userCarts[value.user_id];
+            currentCart = userCarts[value.user_id] ?: [];
         }
         
         currentCart.push(value.item);
@@ -211,7 +211,7 @@ service "CarRental" on ep {
             };
         }
         
-        CartItem[] cartItems = userCarts[value.id];
+        CartItem[] cartItems = userCarts[value.id] ?: [];
         Reservation[] newReservations = [];
         
         // Process each cart item
@@ -225,7 +225,7 @@ service "CarRental" on ep {
                 };
             }
             
-            Car car = cars[item.plate];
+            Car car = cars[item.plate] ?: {};
             if car.status != "AVAILABLE" {
                 return {
                     ok: false,
@@ -267,7 +267,6 @@ service "CarRental" on ep {
             reservations: newReservations
         };
     }
-
     //  Implement CreateUsers with streaming and validation
     remote function CreateUsers(stream<User, grpc:Error?> clientStream) returns CreateUsersResponse|error {
         log:printInfo("Creating users via streaming...");

@@ -1,4 +1,6 @@
 import ballerina/io;
+import ballerina/grpc;
+import ballerina/grpc;
 
 
 CarRentalClient ep = check new ("http://localhost:9090");
@@ -264,4 +266,5 @@ function updateCarInteractive() returns error? {
     string yearStr = io:readln("Year [" + searchResp.car.year.toString() + "]: ");
     string priceStr = io:readln("Daily price [" + searchResp.car.daily_price.toString() + "]: ");
     string mileageStr = io:readln("Mileage [" + searchResp.car.mileage.toString() + "]: ");
-    string status = io:rea
+    string status = io:readln("Status [" + searchResp.car.status + "]: ");
+}
