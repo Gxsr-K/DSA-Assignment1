@@ -203,16 +203,19 @@ service "CarRental" on ep {
         log:printInfo("Placing reservation for user: " + value.id);
         
         // Check if user has items in cart
-        if !userCarts.hasKey(value.id) || userCarts[value.id].length() == 0 {
-            return {
-                ok: false,
-                message: "Cart is empty",
-                reservations: []
-            };
-        }
-        
         CartItem[] cartItems = userCarts[value.id] ?: [];
         Reservation[] newReservations = [];
+       
+        // Check if user has items in cart
+     
+    
+      if cartItems.length() == 0 {
+        return {
+            ok: false,
+            message: "Cart is empty",
+            reservations: []
+        };
+    }
         
         // Process each cart item
         foreach CartItem item in cartItems {
