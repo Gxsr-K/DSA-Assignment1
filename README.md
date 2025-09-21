@@ -50,14 +50,14 @@ DSA-Assignment-1/
     │   ├── Ballerina.toml
     │   ├── Dependencies.toml
     │   ├── car_rental_pb.bal
-    │   └── car_rental_service_client.bal
+    │   └── car_rentalservice_client.bal
     │
     ├── car-rental-service/
     │   ├── target/
     │   ├── Ballerina.toml
     │   ├── Dependencies.toml
     │   ├── car_rental_pb.bal
-    │   └── car_rental_service_service.bal
+    │   └── car_rentalservice_service.bal
     │
     └── protos/
         ├── proto/
