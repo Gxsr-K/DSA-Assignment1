@@ -148,23 +148,7 @@ bal run carrentalservice_client.bal
 
 ---
 
-##  Assignment Requirements Compliance
 
-### Question 1 (50 marks)
-
-* Working Solution (7)
-* Service Implementation (35)
-* Client Implementation (10)
-
-### Question 2 (50 marks)
-
-*  Protocol Buffer Contract (15)
-*  gRPC Client (10)
-*  gRPC Server (25)
-
-**Total:** 100 Marks
-
----
 
 ## 👥 Group Members
 
